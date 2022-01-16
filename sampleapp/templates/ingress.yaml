@@ -1,0 +1,25 @@
+{{- if .Values.ingress.enabled -}}
+{{- $fullName := include "sampleapp.fullname" . -}}
+{{- $svcPort := .Values.service.port -}}
+apiVersion: networking.k8s.io/v1beta1
+kind: Ingress
+metadata:
+  name: {{ $fullName }}
+  labels:
+    {{- include "sampleapp.labels" . | nindent 4 }}
+  annotations:
+    kubernetes.io/ingress.class: alb
+    alb.ingress.kubernetes.io/scheme: internet-facing
+    alb.ingress.kubernetes.io/target-type: ip
+    alb.ingress.kubernetes.io/group.name: {{ .Values.ingress.albgroupname }}
+    alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:us-east-1:876478529742:certificate/923ed143-882c-4cf8-9142-c10f85f6bf22
+spec:
+  rules:
+    - host: "{{ include "sampleapp.fullname" . }}.smsgupshup.dev"
+      http:
+        paths:
+          - path: /*
+            backend:
+              serviceName: {{ $fullName }}
+              servicePort: {{ $svcPort }}
+{{- end }}
